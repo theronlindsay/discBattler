@@ -151,6 +151,12 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(jumpForces, ForceMode.Impulse);
     }
 
+    public void toddleSlide(float value)
+    {
+        //Add this
+
+    }
+
     void Look(){
         
         //Set the player rotation based on the look transform
@@ -225,23 +231,6 @@ public class PlayerController : MonoBehaviour
         aimValue = value;
         SetCamera();
     }
-
-    public void toddleSlide(float value)
-    {
-        isSliding = value == 1f;
-
-        if (isSliding)
-        {
-            rb.AddForce(camHolder.transform.forward * 10, ForceMode.Impulse);
-            // rotate player so model is facing the direction of the slide
-            transform.rotation = Quaternion.Euler(0, rb.transform.rotation.eulerAngles.y, 0);
-
-
-        } else {
-            rb.AddForce(-camHolder.transform.forward * 10, ForceMode.Impulse);
-        }
-    }
-
     private void SetCamera()
     {
         if (aimValue== 1f && !firstPersonCam.activeInHierarchy)
@@ -282,6 +271,20 @@ public class PlayerController : MonoBehaviour
                 }
         } else {
             SetGrounded(false);
+        }
+
+        // Check if player is wall running
+        //Create a new horizontal ray
+        Ray wallRay = new Ray(transform.position, transform.right);
+        Debug.DrawLine(transform.position, transform.position + transform.right * maxRayDist, Color.cyan);
+
+        //Check if the ray hits anything (except the player's layer) ~ is 'all but' `1<<3` is the player's layer
+        bool _wallRayDidHit = Physics.Raycast(wallRay, out RaycastHit wallHit, maxRayDist, ~(1<<3));
+        Debug.DrawLine(transform.position, wallHit.point, Color.magenta);
+
+        if (_wallRayDidHit)
+        {
+            //TODO: Add wall run logic
         }
 
         //If the ray hit something

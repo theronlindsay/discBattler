@@ -12,6 +12,13 @@ public class gun : MonoBehaviour
     public float impactForce;
     public float bulletSpeed;
     public GameObject bulletPrefab;
+    public GameObject firePoint;
+
+    public Camera Camera;
+
+    public Vector2 mousePos;    
+    
+
 
     private bool canShoot = true;
     private float nextTimeToFire = 0;
@@ -23,6 +30,11 @@ public class gun : MonoBehaviour
         {
             canShoot = true;
         }
+
+        Debug.Log(mousePos);
+        //update mousePOS
+        mousePos = Camera.ScreenToWorldPoint(Input.mousePosition);
+        Debug.Log(Input.mousePosition);
     }
 
     public void Shoot()
@@ -32,22 +44,28 @@ public class gun : MonoBehaviour
         {
             return;
         }
-        //Set the next time to fire
+
+        // Ensure firePoint and bulletPrefab are assigned
+        if (firePoint == null || bulletPrefab == null)
+        {
+            Debug.LogError("FirePoint or BulletPrefab is not assigned.");
+            return;
+        }
+        
+        //  Set cooldown
         nextTimeToFire = Time.time + 1f / fireRate;
-        Debug.Log("Shoot");
-        //Instantiate the bullet
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, transform.rotation);
-        //Put bullet in front of the gun
-        bullet.transform.position = transform.position + transform.forward;
-        //Get the bullet script
-        bullet bulletScript = bullet.GetComponent<bullet>();
-        //Set the bullet damage
-        bulletScript.damage = damage;
-        //Get the bullet rigidbody
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        //Add force to the bullet
-        rb.AddForce(transform.forward * bulletSpeed, ForceMode.Impulse);
-        //reset the canShoot variable
+        //aim the gun at the point where the mouse and direction of the gun meet
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 direction = (mousePos - transform.position).normalized;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle);
+        //create the bullet
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.transform.position, transform.rotation);
+        //set the bullet speed
+        bullet.GetComponent<Rigidbody2D>().velocity = direction * bulletSpeed;
+        //set the bullet damage
+        bullet.GetComponent<bullet>().damage = damage;
+
         canShoot = false;
     }
 
