@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEditor;
 
@@ -8,11 +9,37 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem; // Required for Input System
 
-
-
-
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
+    //If the not the owner, destroy the script
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        Debug.Log("OnNetworkSpawn");
+
+        //If not local player, destroy the script and audio listener
+        if (!IsOwner)
+        {
+            GetComponent<Renderer>().material.color = Color.red;
+            Destroy(GetComponent<AudioListener>());
+            //Destroy(this);
+        }
+
+        //if owner, set the camera priority to 10
+        if (IsOwner)
+        {
+            firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
+            thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
+        }   else {
+            //Set the first and third person cameras to priority 0
+            firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
+            thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
+        }
+
+
+        
+    }
+
 
     //Player components
     [Header("Player Components")]
@@ -20,7 +47,6 @@ public class PlayerController : MonoBehaviour
     public GameObject camHolder;
     public GameObject thirdPersonCam;
     public GameObject firstPersonCam;
-    public float lookX, lookY;
     public float speed, sprintSpeed, sensitivity, jumpForce, maxForce;
     public bool grounded;
     private bool isSprinting;
@@ -43,43 +69,39 @@ public class PlayerController : MonoBehaviour
     public float uprightJoinSpringDamper;
 
     //Private variables
-    private Vector2 move, look;
-    private float lookRotation;
+    public Vector2 move, look;
 
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        move = context.ReadValue<Vector2>();
+    // Start is called before the first frame update
+    void Start()
+    {  
+        //Lock cursor to center of screen
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
-    public void OnLook(InputAction.CallbackContext context)
+    //runs every physics update
+    private void FixedUpdate()
     {
-        look = context.ReadValue<Vector2>();
+        UpdateUprightForce(Time.fixedDeltaTime);
+        CheckForColliders();
+
+        
+        if(!Application.isFocused || !IsOwner){
+            
+            return;
+        }   
+
+        Move();
+        Look();
     }
 
-    public void OnJump(InputAction.CallbackContext context)
-    {
-        Jump();
-    }
-
-    public void OnSprint(InputAction.CallbackContext context)
-    {
-        isSprinting = context.ReadValueAsButton();
-    }
-
-    public void OnAim(InputAction.CallbackContext context)
-    {
-        toggleAim(context.ReadValue<float>());
-    }
-
-    public void OnSlide(InputAction.CallbackContext context)
-    {
-        toddleSlide(context.ReadValue<float>());
-    }
+    //Multiply a quaternion by a scalar
     public static Quaternion Multiply(Quaternion input, float scalar)
     {
         return new Quaternion(input.x * scalar, input.y * scalar, input.z * scalar, input.w * scalar);
     }
 
+    //Find the shortest rotation between two quaternions
     public static Quaternion ShortestRotation(Quaternion a, Quaternion b)
     {
 
@@ -88,22 +110,16 @@ public class PlayerController : MonoBehaviour
 
             return a * Quaternion.Inverse(Multiply(b, -1));
 
-        }else return a * Quaternion.Inverse(b);
+        } else return a * Quaternion.Inverse(b);
     }
 
-    //runs every physics update
-    private void FixedUpdate()
-    {
-        Move();
-        CheckForColliders();
-        UpdateUprightForce(Time.fixedDeltaTime);
-    }
+
 
     //Moves the player
     void Move(){
         //Find target velocity
         Vector3 currentVelocity = rb.velocity;
-        
+
         //Zero out the y velocity
         currentVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
 
@@ -118,6 +134,12 @@ public class PlayerController : MonoBehaviour
         else
         {
             targetVelocity *= speed;
+        }
+
+        //Make sure the camHolder still exists
+        if (camHolder == null)
+        {
+            return;
         }
 
         //Align direction
@@ -151,24 +173,17 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(jumpForces, ForceMode.Impulse);
     }
 
-    public void toddleSlide(float value)
-    {
-        //Add this
-
-    }
-
     void Look(){
         
         //Set the player rotation based on the look transform
-        camHolder.transform.rotation *= Quaternion.AngleAxis(look.x * sensitivity, Vector3.up);
-        camHolder.transform.rotation *= Quaternion.AngleAxis(-look.y * sensitivity, Vector3.right);
+        nextRotation *= Quaternion.AngleAxis(look.x * sensitivity, Vector3.up);
+        nextRotation *= Quaternion.AngleAxis(-look.y * sensitivity, Vector3.right);
 
         //reset the y rotation of the look transform
-        var angles = camHolder.transform.localEulerAngles;
+        var angles = nextRotation.eulerAngles;
         angles.z = 0;
         //Get the current angle of the look transform
-        var angle = camHolder.transform.localEulerAngles.x;
-
+        var angle = nextRotation.eulerAngles.x;
 
         //Clamp the Up/Down rotation
         if (angle > 180 && angle < 340)
@@ -180,59 +195,21 @@ public class PlayerController : MonoBehaviour
             angles.x = 60;
         }
 
-
-        camHolder.transform.localEulerAngles = angles;
-
-        nextRotation = Quaternion.Lerp(camHolder.transform.rotation, nextRotation, Time.deltaTime * 0.5f);
-
-        // if (move.x == 0 && move.y == 0) 
-        // {   
-        //     nextPosition = transform.position;
-
-        //     if (aimValue == 1)
-        //     {
-        //         //Set the player rotation based on the look transform
-        //         transform.rotation = Quaternion.Euler(0, camHolder.transform.rotation.eulerAngles.y, 0);
-        //         //reset the y rotation of the look transform
-        //         camHolder.transform.localEulerAngles = new Vector3(angles.x, 0, 0);
-        //     }
-
-        //     return; 
-        // }
-
-        //Move Camera Side to Side
-        //camHolder.transform.Rotate(Vector3.up * look.x * sensitivity);
-
-        //Moves Camera Up and Down
-        //camHolder.transform.Rotate(Vector3.right * -look.y * sensitivity);
+        nextRotation = Quaternion.Euler(angles);
+        camHolder.transform.rotation = nextRotation;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        //Lock cursor to center of screen
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
 
-    //Happens after all updates
-    private void LateUpdate(){
-        Look();
-        SetCamera();
-
-    }
-
+    //Set the grounded variable
     public void SetGrounded(bool value){
         grounded = value;
     }
 
+    //Toggle CameraMode
     public void toggleAim(float value)
-    {
+    {        
         aimValue = value;
-        SetCamera();
-    }
-    private void SetCamera()
-    {
+
         if (aimValue== 1f && !firstPersonCam.activeInHierarchy)
         {
             thirdPersonCam.SetActive(false);
@@ -242,8 +219,28 @@ public class PlayerController : MonoBehaviour
         {
             thirdPersonCam.SetActive(true);
             firstPersonCam.SetActive(false);
+        } else {
+            Debug.Log("Camera already active");
         }
     }
+
+    //Toggle Sliding
+    public void toddleSlide(float value)
+    {
+        isSliding = value == 1f;
+
+        if (isSliding)
+        {
+            rb.AddForce(camHolder.transform.forward * 10, ForceMode.Impulse);
+            // rotate player so model is facing the direction of the slide
+            transform.rotation = Quaternion.Euler(0, rb.transform.rotation.eulerAngles.y, 0);
+
+
+        } else {
+            rb.AddForce(-camHolder.transform.forward * 10, ForceMode.Impulse);
+        }
+    }
+
 
     void CheckForColliders(){
 
@@ -271,20 +268,6 @@ public class PlayerController : MonoBehaviour
                 }
         } else {
             SetGrounded(false);
-        }
-
-        // Check if player is wall running
-        //Create a new horizontal ray
-        Ray wallRay = new Ray(transform.position, transform.right);
-        Debug.DrawLine(transform.position, transform.position + transform.right * maxRayDist, Color.cyan);
-
-        //Check if the ray hits anything (except the player's layer) ~ is 'all but' `1<<3` is the player's layer
-        bool _wallRayDidHit = Physics.Raycast(wallRay, out RaycastHit wallHit, maxRayDist, ~(1<<3));
-        Debug.DrawLine(transform.position, wallHit.point, Color.magenta);
-
-        if (_wallRayDidHit)
-        {
-            //TODO: Add wall run logic
         }
 
         //If the ray hit something
@@ -342,4 +325,39 @@ public class PlayerController : MonoBehaviour
         //Add torque to the rigidbody, don't ask me why it's this way, it just works
         rb.AddTorque((rotAxis * (rotRadians * uprightJointSpringStrength)) - (rb.angularVelocity * uprightJoinSpringDamper));
     }
+
+    //Input System Functions
+
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        move = context.ReadValue<Vector2>();
+    }
+
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        look = context.ReadValue<Vector2>();
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        Jump();
+    }
+
+    public void OnSprint(InputAction.CallbackContext context)
+    {
+        isSprinting = context.ReadValueAsButton();
+    }
+
+    public void OnAim(InputAction.CallbackContext context)
+    {
+        toggleAim(context.ReadValue<float>());
+        Debug.Log("Aim: " + context.ReadValue<float>());
+    }
+
+    public void OnSlide(InputAction.CallbackContext context)
+    {
+        toddleSlide(context.ReadValue<float>());
+    }
+
 }
