@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class gun : MonoBehaviour
+public class gun : NetworkBehaviour
 {
     //gun attributes
     [Header("Gun Attributes")]
     public float damage;
-    public float range;
+
+    public float range; //How far the bullet can go
     public float fireRate;
     public float impactForce;
     public float bulletSpeed;
@@ -16,7 +18,7 @@ public class gun : MonoBehaviour
     private bool canShoot = true;
     private float nextTimeToFire = 0;
 
-    // update is called once per frame
+    // update is called once per frame (Pretty Much just a timer)
     void Update()
     {
         if (Time.time >= nextTimeToFire)
@@ -28,7 +30,7 @@ public class gun : MonoBehaviour
     public void Shoot()
     {
         //Check if the gun can shoot
-        if (!canShoot)
+        if (!canShoot || !IsOwner)
         {
             return;
         }
@@ -36,17 +38,13 @@ public class gun : MonoBehaviour
         nextTimeToFire = Time.time + 1f / fireRate;
         Debug.Log("Shoot");
         //Instantiate the bullet
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, transform.rotation);
-        //Put bullet in front of the gun
-        bullet.transform.position = transform.position + transform.forward;
+        GameObject bullet = Instantiate(bulletPrefab, transform.position + transform.forward, transform.rotation);
         //Get the bullet script
         bullet bulletScript = bullet.GetComponent<bullet>();
         //Set the bullet damage
-        bulletScript.damage = damage;
-        //Get the bullet rigidbody
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        bulletScript.SetStats(damage, range);
         //Add force to the bullet
-        rb.AddForce(transform.forward * bulletSpeed, ForceMode.Impulse);
+        bulletScript.Shoot(transform.forward, bulletSpeed);
         //reset the canShoot variable
         canShoot = false;
     }
