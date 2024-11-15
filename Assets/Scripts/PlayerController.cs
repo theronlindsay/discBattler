@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -49,6 +50,7 @@ public class PlayerController : NetworkBehaviour
     public GameObject firstPersonCam;
     public float speed, sprintSpeed, sensitivity, jumpForce, maxForce;
     public bool grounded;
+    public bool canJump = true;
     private bool isSprinting;
     private bool isSliding;
     public Quaternion nextRotation;
@@ -71,9 +73,13 @@ public class PlayerController : NetworkBehaviour
     //Private variables
     public Vector2 move, look;
 
+    public Animator animator;
+
     // Start is called before the first frame update
     void Start()
     {  
+
+        animator = GameObject.Find("PlayerModel").GetComponent<Animator>();
         //Lock cursor to center of screen
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -93,6 +99,9 @@ public class PlayerController : NetworkBehaviour
 
         Move();
         Look();
+        if(grounded){
+            animator.SetBool("IsFalling", false);
+        }
     }
 
     //Multiply a quaternion by a scalar
@@ -117,6 +126,7 @@ public class PlayerController : NetworkBehaviour
 
     //Moves the player
     void Move(){
+        
         //Find target velocity
         Vector3 currentVelocity = rb.velocity;
 
@@ -126,14 +136,33 @@ public class PlayerController : NetworkBehaviour
         //new direction is the direction the player is facing, multiplied by the speed
         Vector3 targetVelocity = new Vector3(move.x, 0, move.y);
 
+        //If velocity is zero, turn animator off
+        if (targetVelocity == Vector3.zero)
+        {
+            animator.SetBool("IsWalking", false);
+            animator.SetBool("Backwards", false);
+        } else if (targetVelocity.z < Vector3.zero.z)
+        {
+            Debug.Log("Walking Backwards");
+            animator.SetBool("Backwards", true);
+        }
+        else {
+            animator.SetBool("Backwards", false);
+            Debug.Log("Walking");
+            animator.SetBool("IsWalking", true);
+        }
+
         //Apply speed
         if (isSprinting)
         {
+            Debug.Log("Sprinting");
+            animator.SetBool("IsRunning", true);
             targetVelocity *= sprintSpeed;
         }
         else
         {
             targetVelocity *= speed;
+            animator.SetBool("IsRunning", false);
         }
 
         //Make sure the camHolder still exists
@@ -159,19 +188,27 @@ public class PlayerController : NetworkBehaviour
 
         //Apply force
         rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
+        
     }
     
     void Jump(){
-        
-        Vector3 jumpForces = Vector3.zero;
-        //Check if player is grounded
-        if(grounded){
-            jumpForces = Vector3.up * jumpForce;
-        }
-
-        //Apply force
-        rb.AddForce(jumpForces, ForceMode.Impulse);
+        grounded = false;
+        animator.SetTrigger("Jump");
+        Invoke("DelayedJump", 0.1f);
     }
+    void DelayedJump(){
+        Vector3 jumpForces = Vector3.zero;
+        jumpForces = Vector3.up * jumpForce;
+        rb.AddForce(jumpForces, ForceMode.Impulse);
+        animator.SetBool("IsFalling", true);
+        Invoke("SetFalling", 0.2f);
+        
+    }   
+    void SetFalling(){
+        animator.SetBool("IsFalling", true);
+        canJump = true;
+    }   
 
     void Look(){
         
@@ -341,7 +378,12 @@ public class PlayerController : NetworkBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        Jump();
+        if(canJump && grounded){
+            canJump = false;
+            Jump();
+        } else {
+            Debug.Log("Can't Jump");
+        }
     }
 
     public void OnSprint(InputAction.CallbackContext context)
@@ -359,5 +401,10 @@ public class PlayerController : NetworkBehaviour
     {
         toddleSlide(context.ReadValue<float>());
     }
+
+    public void OnRecall(InputAction.CallbackContext context)
+    {
+        Debug.Log("Recall");
+    }   
 
 }

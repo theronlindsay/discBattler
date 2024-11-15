@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Callbacks;
 using UnityEngine;
 
 public class bullet : MonoBehaviour
@@ -13,7 +10,6 @@ public class bullet : MonoBehaviour
     public float range = 100; //How far the bullet can go
 
     public Vector3 startingPosition;
-
 
     // Start is called before the first frame update
     void Start()
@@ -42,7 +38,6 @@ public class bullet : MonoBehaviour
 
         return Vector3.Distance(startingPosition, transform.position);
     }
-
 
     //on collision
     private void OnCollisionEnter2D(Collision2D collision)
