@@ -67,27 +67,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-<<<<<<< Updated upstream
-=======
-                },
-                {
-                    "name": "Menu",
-                    "type": "Button",
-                    "id": "5c2f576a-8093-4c59-8fea-59ab6a1c9de8",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Recall",
-                    "type": "Button",
-                    "id": "2d3be96a-56eb-4070-a929-8df392853367",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
->>>>>>> Stashed changes
                 }
             ],
             "bindings": [
@@ -409,53 +388,6 @@
                     "action": "Slide",
                     "isComposite": false,
                     "isPartOfComposite": false
-<<<<<<< Updated upstream
-=======
-                },
-                {
-                    "name": "",
-                    "id": "02cba077-7bad-450e-bfa3-359f6979b19a",
-                    "path": "<Gamepad>/start",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Menu",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4069116a-e40e-4205-af2b-f49e61549c9d",
-                    "path": "<Keyboard>/escape",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Menu",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "93dcd0fe-a054-4111-ae4b-72d3689a031e",
-                    "path": "<Keyboard>/e",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Recall",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e1659e84-5d3e-4b0c-9434-fd6789f00812",
-                    "path": "<Gamepad>/leftShoulder",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Recall",
-                    "isComposite": false,
-                    "isPartOfComposite": false
->>>>>>> Stashed changes
                 }
             ]
         },
