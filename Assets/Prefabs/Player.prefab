@@ -28,13 +28,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 91363873203741770}
   serializedVersion: 2
-<<<<<<< Updated upstream
-  m_LocalRotation: {x: 0.6427879, y: -0, z: -0, w: -0.76604426}
-  m_LocalPosition: {x: 0.008, y: 0.836, z: 0.2249999}
-=======
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.008, y: 1.142, z: 0.2249999}
->>>>>>> Stashed changes
   m_LocalScale: {x: 0.93, y: 0.32189003, z: 0.91554224}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -236,13 +231,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1162491345676139184}
   serializedVersion: 2
-<<<<<<< Updated upstream
-  m_LocalRotation: {x: -0, y: -0, z: 0, w: -1}
-  m_LocalPosition: {x: 1.1182796, y: 0.4969452, z: -4.763659}
-=======
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.12903225, y: 2.8653188, z: -3.2767467}
->>>>>>> Stashed changes
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -628,7 +618,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3152492605880968201}
-  m_Mesh: {fileID: -1036367485150013101, guid: 67f5f634ff90a6740b7404f3d4c3d201, type: 3}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &3219491891442718556
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -760,13 +750,8 @@ MonoBehaviour:
   firstPersonCam: {fileID: 2235233391274340753}
   speed: 4
   sprintSpeed: 10
-<<<<<<< Updated upstream
-  sensitivity: 0.3
-  jumpForce: 3
-=======
   sensitivity: 3.13
   jumpForce: 10
->>>>>>> Stashed changes
   maxForce: 1
   grounded: 0
   canJump: 1
@@ -1047,13 +1032,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5813835010633329215}
   serializedVersion: 2
-<<<<<<< Updated upstream
-  m_LocalRotation: {x: -0.6427879, y: -0, z: -0, w: 0.76604426}
-  m_LocalPosition: {x: 1.048, y: -3.4312963, z: -0.68986607}
-=======
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.12799999, y: 2.0643175, z: -2.775}
->>>>>>> Stashed changes
   m_LocalScale: {x: 1, y: 1.2757572, z: 1.0142484}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1369,8 +1349,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Damping: 0
-<<<<<<< Updated upstream
-=======
 --- !u!1001 &2098960655427285531
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2303,4 +2281,3 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2098960655427285531}
   m_PrefabAsset: {fileID: 0}
->>>>>>> Stashed changes
