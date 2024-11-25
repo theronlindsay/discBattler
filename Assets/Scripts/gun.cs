@@ -58,8 +58,6 @@ public class gun : NetworkBehaviour
         Debug.DrawLine(launchPoint.transform.position, launchPoint.transform.position + transform.forward * range, Color.red, 2);
         //Get the bullet script
         bullet bulletScript = bullet.GetComponent<bullet>();
-        //Set the bullet damage
-        bulletScript.SetStats(damage, range);
         //Add force to the bullet
         bulletScript.Shoot(transform.forward, bulletSpeed);
     }

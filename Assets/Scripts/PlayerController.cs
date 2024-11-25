@@ -141,15 +141,31 @@ public class PlayerController : NetworkBehaviour
         {
             animator.SetBool("IsWalking", false);
             animator.SetBool("Backwards", false);
+            animator.SetBool("StrafeLeft", false); 
+            animator.SetBool("StrafeRight", false);
         } else if (targetVelocity.z < Vector3.zero.z)
         {
             Debug.Log("Walking Backwards");
             animator.SetBool("Backwards", true);
+            animator.SetBool("StrafeLeft", false);
+            animator.SetBool("StrafeRight", false);
+        } else if(targetVelocity.x < Vector3.zero.x && animator.GetBool("IsFalling") == false){ 
+            Debug.Log("Strafing Left");
+            animator.SetBool("StrafeLeft", true);
+            animator.SetBool("StrafeRight", false);
+            animator.SetBool("Backwards", false);
+        } else if(targetVelocity.x > Vector3.zero.x && animator.GetBool("IsFalling") == false){
+            Debug.Log("Strafing Right");
+            animator.SetBool("StrafeRight", true);
+            animator.SetBool("StrafeLeft", false);
+            animator.SetBool("Backwards", false);
         }
         else {
             animator.SetBool("Backwards", false);
             Debug.Log("Walking");
             animator.SetBool("IsWalking", true);
+            animator.SetBool("StrafeLeft", false);
+            animator.SetBool("StrafeRight", false);
         }
 
         //Apply speed
@@ -202,6 +218,11 @@ public class PlayerController : NetworkBehaviour
         jumpForces = Vector3.up * jumpForce;
         rb.AddForce(jumpForces, ForceMode.Impulse);
         animator.SetBool("IsFalling", true);
+        animator.SetBool("IsWalking", false);
+        animator.SetBool("IsRunning", false);
+        animator.SetBool("Backwards", false);
+        animator.SetBool("StrafeLeft", false);
+        animator.SetBool("StrafeRight", false);
         Invoke("SetFalling", 0.2f);
         
     }   

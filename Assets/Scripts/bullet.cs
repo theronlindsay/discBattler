@@ -7,8 +7,6 @@ public class bullet : MonoBehaviour
     [Header("Bullet Attributes")]
     public float damage = 1;
 
-    public float range = 100; //How far the bullet can go
-
     public Vector3 startingPosition;
 
     // Start is called before the first frame update
@@ -20,32 +18,29 @@ public class bullet : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CheckDistanceTraveled();
-    }
-
-    // Determine how far the bullet has travelled, destroy it if it has gone too far
-    // Returns the distance the bullet has traveled as a float
-    public float CheckDistanceTraveled()
-    {
-        float distance = Vector3.Distance(startingPosition, transform.position);
-        if(distance >= range)
-        {
-            //Disable the bullet
-            gameObject.SetActive(false);
-            //Destroy the bullet
-            Destroy(gameObject);
-        }
-
-        return Vector3.Distance(startingPosition, transform.position);
+        
     }
 
     //on collision
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter(Collision collision)
     {
         //Disable the bullet
         gameObject.SetActive(false);
-        //Destroy the bullet
-        Destroy(gameObject);
+
+
+        //Get the normal of the collision
+        Vector3 normal = collision.contacts[0].normal;
+        //Reflect the bullet
+        Vector3 direction = Vector3.Reflect(transform.forward, normal);
+        //Add force to the bullet
+        Rigidbody rb = gameObject.GetComponent<Rigidbody>();
+        rb.AddForce(direction * 100, ForceMode.Impulse);
+
+        //If the bullet hits the ground, destroy it
+        if (collision.gameObject.tag == "Ground")
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void Shoot(Vector3 direction, float bulletSpeed){
@@ -55,12 +50,6 @@ public class bullet : MonoBehaviour
         Rigidbody rb = gameObject.GetComponent<Rigidbody>();
         rb.AddForce(force, ForceMode.Impulse);
         Debug.Log(gameObject.GetComponent<Rigidbody>().velocity);
-    }
-
-    //SetStats() sets the bullet stats
-    public void SetStats(float damage, float range){
-        this.damage = damage;
-        this.range = range;
     }
 
   
