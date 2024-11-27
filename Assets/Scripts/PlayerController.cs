@@ -145,24 +145,20 @@ public class PlayerController : NetworkBehaviour
             animator.SetBool("StrafeRight", false);
         } else if (targetVelocity.z < Vector3.zero.z)
         {
-            Debug.Log("Walking Backwards");
             animator.SetBool("Backwards", true);
             animator.SetBool("StrafeLeft", false);
             animator.SetBool("StrafeRight", false);
         } else if(targetVelocity.x < Vector3.zero.x && animator.GetBool("IsFalling") == false){ 
-            Debug.Log("Strafing Left");
             animator.SetBool("StrafeLeft", true);
             animator.SetBool("StrafeRight", false);
             animator.SetBool("Backwards", false);
         } else if(targetVelocity.x > Vector3.zero.x && animator.GetBool("IsFalling") == false){
-            Debug.Log("Strafing Right");
             animator.SetBool("StrafeRight", true);
             animator.SetBool("StrafeLeft", false);
             animator.SetBool("Backwards", false);
         }
         else {
             animator.SetBool("Backwards", false);
-            Debug.Log("Walking");
             animator.SetBool("IsWalking", true);
             animator.SetBool("StrafeLeft", false);
             animator.SetBool("StrafeRight", false);
@@ -425,7 +421,7 @@ public class PlayerController : NetworkBehaviour
 
     public void OnRecall(InputAction.CallbackContext context)
     {
-        Debug.Log("Recall");
+        camHolder.GetComponent<gun>().Recall();
     }   
 
 }

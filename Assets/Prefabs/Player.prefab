@@ -114,13 +114,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   launchPoint: {fileID: 2116002863067222232}
-  range: 100
   fireRate: 1
   impactForce: 100
-  bulletSpeed: 50
+  bulletSpeed: 30
   bulletPrefab: {fileID: 3896266917661234006, guid: 6bd40b792ca33403a8e5dd3b7935938c,
     type: 3}
+  disc: {fileID: 0}
   anim: {fileID: 8733313470898296621}
+  player: {fileID: 3152492605880968201}
 --- !u!1 &334938427909068638
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,8 +949,24 @@ MonoBehaviour:
     m_ActionName: Player/Slide[/Keyboard/leftCtrl]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 5c2f576a-8093-4c59-8fea-59ab6a1c9de8
-    m_ActionName: Player/Menu[/XInputControllerWindows/start,/Keyboard/escape]
+    m_ActionId: 1e387068-cafa-4260-8c05-2cba8564915e
+    m_ActionName: Player/Menu[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 195309689859588188}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnRecall
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 40db111a-cd59-4644-82f6-91493aa9d243
+    m_ActionName: Player/Recall[/Keyboard/e]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

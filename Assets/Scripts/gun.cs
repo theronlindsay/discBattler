@@ -9,27 +9,26 @@ public class gun : NetworkBehaviour
     [Header("Gun Attributes")]
     public float damage;
     public GameObject launchPoint;
-
-    public float range; //How far the bullet can go
     public float fireRate;
     public float impactForce;
     public float bulletSpeed;
     public GameObject bulletPrefab;
+    public GameObject disc;
     private bool canShoot = true;
     private float nextTimeToFire = 0;
     public Animator anim;
+    public GameObject player;
 
     void Start(){
         anim = GameObject.Find("PlayerModel").GetComponent<Animator>();
     }
 
-    // update is called once per frame (Pretty Much just a timer)
-    void Update()
-    {
-        if (Time.time >= nextTimeToFire)
-        {
-            canShoot = true;
+    // Activate Recall
+    public void Recall(){
+        if(disc != null){
+            disc.GetComponent<bullet>().Recall();
         }
+        
     }
 
     public void Shoot()
@@ -42,8 +41,6 @@ public class gun : NetworkBehaviour
         }
         //reset the canShoot variable
         canShoot = false;
-        //Set the next time to fire
-        nextTimeToFire = Time.time + 1f / fireRate;
         //Play the shooting animation
         anim.SetTrigger("Throw");
         //Throw the disc
@@ -51,13 +48,21 @@ public class gun : NetworkBehaviour
         
     }
 
+    //Recall disk sends the disc back to the player, when the player collides with it, enable CanShoot
+    public void ReturnDisc(){
+        // Launch the disc back to the player
+        canShoot = true;
+    }
+
     private void ThrowDisc(){
         //Instantiate the bullet
-        GameObject bullet = Instantiate(bulletPrefab, launchPoint.transform.position, transform.rotation);
+        disc = Instantiate(bulletPrefab, launchPoint.transform.position, transform.rotation);
+        //Give the bullet a reference to the player
+        disc.GetComponent<bullet>().player = player;
         Debug.Log(launchPoint.transform.position);
-        Debug.DrawLine(launchPoint.transform.position, launchPoint.transform.position + transform.forward * range, Color.red, 2);
+        Debug.DrawLine(launchPoint.transform.position, launchPoint.transform.position + transform.forward, Color.red, 2);
         //Get the bullet script
-        bullet bulletScript = bullet.GetComponent<bullet>();
+        bullet bulletScript = disc.GetComponent<bullet>();
         //Add force to the bullet
         bulletScript.Shoot(transform.forward, bulletSpeed);
     }

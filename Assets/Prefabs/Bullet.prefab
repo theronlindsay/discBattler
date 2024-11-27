@@ -112,7 +112,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!114 &-1764772505799561596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,8 +126,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  range: 100
   startingPosition: {x: 0, y: 0, z: 0}
+  player: {fileID: 0}
+  returnSpeed: 10
+  isReturning: 0
 --- !u!1001 &2704937266216352255
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -139,17 +141,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 9816d5b5a6ac3a647aa8ff11fbfd03f4,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 41
+      value: 31.26
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9816d5b5a6ac3a647aa8ff11fbfd03f4,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 41
+      value: 31.26
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9816d5b5a6ac3a647aa8ff11fbfd03f4,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 41
+      value: 31.26
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9816d5b5a6ac3a647aa8ff11fbfd03f4,
         type: 3}
