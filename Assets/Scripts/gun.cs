@@ -67,4 +67,14 @@ public class gun : NetworkBehaviour
         bulletScript.Shoot(transform.forward, bulletSpeed);
     }
 
+    public void ResetDisc()
+    {
+        if (disc != null)
+        {
+            Destroy(disc); // Destroy any existing disc
+        }
+        canShoot = true; // Allow the player to throw a new disc
+    }
+
+
 }
