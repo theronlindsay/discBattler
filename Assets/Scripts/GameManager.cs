@@ -1,5 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
+using UnityEditor;
 
 public class GameManager : NetworkBehaviour
 {
@@ -15,29 +17,15 @@ public class GameManager : NetworkBehaviour
     public Transform spawnPointPlayer1;
     public Transform spawnPointPlayer2;
 
+    public GameObject player1;
+    public GameObject player2;
+
+    public GameObject disc; // The disc prefab
+
     public static GameManager Instance;
-
-    private void Awake()
+    [Rpc(SendTo.Everyone)]
+    public void PlayerScoredServerRpc(NetworkObjectReference scoringPlayer)
     {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
-    }
-
-    public void Start()
-    {
-        if (IsServer)
-        {
-            player1Score.Value = 0;
-            player2Score.Value = 0;
-            currentRound.Value = 1;
-        }
-    }
-
-    public void PlayerScored(NetworkObjectReference scoringPlayer)
-    {
-        if (!IsServer) return;
 
         // Award point to the scoring player
         if (scoringPlayer.TryGet(out NetworkObject scoringObject))
@@ -58,6 +46,56 @@ public class GameManager : NetworkBehaviour
         else
         {
             NextRound();
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SpawnDiscRpc(Vector3 position, Quaternion rotation, NetworkObjectReference player)
+    {
+        //Instantiate the disc for everyone
+        GameObject discObject = Instantiate(disc, position, rotation);
+        // Set the player that threw the disc
+        discObject.GetComponent<bullet>().player = player;
+        // Set the starting position of the disc
+        discObject.GetComponent<bullet>().startingPosition = position;
+        // Get the player that threw the disc
+        player.TryGet(out NetworkObject playerObject);
+        // Set the disc reference for the player
+        playerObject.GetComponentInChildren<gun>().discReference = discObject.GetComponent<NetworkObject>();
+        // Define the disc as a network object
+        NetworkObject networkObject = discObject.GetComponent<NetworkObject>();
+        // Set the disc reference for the player
+        playerObject.GetComponentInChildren<gun>().discReference = networkObject;
+        // Spawn the disc for everyone
+        networkObject.Spawn();
+        networkObject.GetComponent<bullet>().Shoot(networkObject.transform.forward, 30);
+        
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ReturnDiscRpc(NetworkObjectReference disc)
+    {
+        // Get the disc that needs to be returned
+        disc.TryGet(out NetworkObject discObject);
+
+        // Call the return disc function on the child of the player
+        discObject.GetComponent<bullet>().Recall();
+    }
+    private void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+    }
+
+    public void Start()
+    {
+        if (IsServer)
+        {
+            player1Score.Value = 0;
+            player2Score.Value = 0;
+            currentRound.Value = 1;
         }
     }
 
@@ -88,7 +126,7 @@ public class GameManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ResetPlayersClientRpc()
+    public void ResetPlayersClientRpc()
     {
         foreach (var player in FindObjectsOfType<PlayerController>())
         {
@@ -97,9 +135,24 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private Transform GetSpawnPoint(ulong clientId)
+
+
+    public Transform GetSpawnPoint(ulong clientId)
     {
         // Assign spawn points based on client ID
-        return clientId == 0 ? spawnPointPlayer1 : spawnPointPlayer2;
+        if (clientId == 0)
+            return spawnPointPlayer1;
+        else if (clientId == 1)
+            return spawnPointPlayer2;
+        else
+            throw new KeyNotFoundException($"No spawn point found for client ID {clientId}");
+    }
+
+    public void PlayerScored(NetworkObjectReference player){
+        PlayerScoredServerRpc(player);
+    }   
+
+    public void SpawnDisc(GameObject disc, Vector3 position, Quaternion rotation, NetworkObjectReference player){
+        SpawnDiscRpc(position, rotation, player);
     }
 }

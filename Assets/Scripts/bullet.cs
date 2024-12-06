@@ -1,22 +1,17 @@
 using UnityEngine;
 using Unity.Netcode;
 
-public class bullet : MonoBehaviour
+public class bullet : NetworkBehaviour
 {
     // Bullet attributes
     [Header("Bullet Attributes")]
     public float damage = 1;
 
     public Vector3 startingPosition;
-    public GameObject player;
+    public NetworkObjectReference player;
 
     public float returnSpeed = 10f;
     public bool isReturning = false;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
 
     void Update()
     {
@@ -30,6 +25,7 @@ public class bullet : MonoBehaviour
     {
         Vector3 direction = target.transform.position - transform.position;
         direction.Normalize();
+        gameObject.GetComponent<Rigidbody>().isKinematic = false;
         gameObject.GetComponent<Rigidbody>().velocity = direction * speed;
         Debug.DrawLine(transform.position, transform.position + direction * 10, Color.red, 2);
     }
@@ -37,36 +33,54 @@ public class bullet : MonoBehaviour
     // Handle collisions
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player") && collision.gameObject != player)
+        if (collision.gameObject.CompareTag("Player") && collision.gameObject != player.TryGet(out NetworkObject playergameObject))
         {
             Debug.Log("Hit another player!");
 
             // Notify the GameManager that a player scored
-            NetworkObjectReference scoringPlayer = new NetworkObjectReference(player.GetComponent<NetworkObject>());
+            NetworkObjectReference scoringPlayer = player;
             GameManager.Instance.PlayerScored(scoringPlayer);
-
-            Destroy(gameObject); // Destroy the disc after scoring
             return;
         }
 
-        if (collision.gameObject == player && isReturning)
-        {
-            Debug.Log("Disc returned to player");
-            isReturning = false;
-            // Call the return disc function on the child of the player
-            player.GetComponentInChildren<gun>().ReturnDisc();
-
-            Destroy(gameObject);
+        if (collision.gameObject == player.TryGet(out NetworkObject playerObject))
+        {   
+            if(isReturning){
+                Debug.Log("Disc returned to player");
+                isReturning = false;
+                // Call the return disc function on the child of the player
+                if (player.TryGet(out NetworkObject gunObject))
+                {
+                    gun playerGun = gunObject.GetComponentInChildren<gun>();
+                    
+                    if (playerGun != null)
+                    {
+                        playerGun.ReturnDisc();
+                    }
+                }
+                
+                Destroy(gameObject);
+            }
             return;
         }
 
         Debug.Log("Hit something else: " + collision.gameObject.name);
 
-        // If the bullet hits the ground, destroy it
+            if (player.TryGet(out NetworkObject networkObject))
+            {
+                networkObject.GetComponentInChildren<gun>().Recall();
+            }
         if (collision.gameObject.CompareTag("Ground"))
         {
-            Destroy(gameObject);
-            player.GetComponent<gun>().Recall();
+            if (player.TryGet(out NetworkObject gunObject))
+                {
+                    gun playerGun = gunObject.GetComponentInChildren<gun>();
+                    
+                    if (playerGun != null)
+                    {
+                        playerGun.Recall();
+                    }
+                }
         }
     }
 

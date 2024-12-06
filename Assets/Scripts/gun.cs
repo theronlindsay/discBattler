@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class gun : NetworkBehaviour
@@ -12,23 +13,22 @@ public class gun : NetworkBehaviour
     public float fireRate;
     public float impactForce;
     public float bulletSpeed;
-    public GameObject bulletPrefab;
-    public GameObject disc;
+    //public GameObject bulletPrefab;
+    public NetworkObject discReference;
     private bool canShoot = true;
     private float nextTimeToFire = 0;
     public Animator anim;
     public GameObject player;
+    public NetworkObjectReference playerReference;
 
     void Start(){
         anim = GameObject.Find("PlayerModel").GetComponent<Animator>();
+        playerReference = new NetworkObjectReference(player.GetComponent<NetworkObject>());
     }
 
     // Activate Recall
     public void Recall(){
-        if(disc != null){
-            disc.GetComponent<bullet>().Recall();
-        }
-        
+        GameManager.Instance.ReturnDiscRpc(discReference.GetComponent<NetworkObjectReference>());
     }
 
     public void Shoot()
@@ -55,23 +55,14 @@ public class gun : NetworkBehaviour
     }
 
     private void ThrowDisc(){
-        //Instantiate the bullet
-        disc = Instantiate(bulletPrefab, launchPoint.transform.position, transform.rotation);
-        //Give the bullet a reference to the player
-        disc.GetComponent<bullet>().player = player;
-        Debug.Log(launchPoint.transform.position);
-        Debug.DrawLine(launchPoint.transform.position, launchPoint.transform.position + transform.forward, Color.red, 2);
-        //Get the bullet script
-        bullet bulletScript = disc.GetComponent<bullet>();
-        //Add force to the bullet
-        bulletScript.Shoot(transform.forward, bulletSpeed);
+        GameManager.Instance.SpawnDiscRpc(launchPoint.transform.position, launchPoint.transform.rotation, playerReference);
     }
 
     public void ResetDisc()
     {
-        if (disc != null)
+        if (discReference != null)
         {
-            Destroy(disc); // Destroy any existing disc
+            Destroy(discReference); // Destroy any existing disc
         }
         canShoot = true; // Allow the player to throw a new disc
     }
