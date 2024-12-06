@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -14,10 +15,11 @@ public class gun : NetworkBehaviour
     public float impactForce;
     public float bulletSpeed;
     //public GameObject bulletPrefab;
-    public NetworkObject discReference;
+    public NetworkObjectReference discReference;
     private bool canShoot = true;
     private float nextTimeToFire = 0;
     public Animator anim;
+    public NetworkAnimator networkAnim;    
     public GameObject player;
     public NetworkObjectReference playerReference;
 
@@ -26,9 +28,14 @@ public class gun : NetworkBehaviour
         playerReference = new NetworkObjectReference(player.GetComponent<NetworkObject>());
     }
 
+    public override void OnNetworkSpawn(){
+        base.OnNetworkSpawn();
+        networkAnim = player.GetComponentInChildren<NetworkAnimator>();
+    }
+
     // Activate Recall
     public void Recall(){
-        GameManager.Instance.ReturnDiscRpc(discReference.GetComponent<NetworkObjectReference>());
+        GameManager.Instance.ReturnDiscRpc(discReference);
     }
 
     public void Shoot()
@@ -41,8 +48,7 @@ public class gun : NetworkBehaviour
         }
         //reset the canShoot variable
         canShoot = false;
-        //Play the shooting animation
-        anim.SetTrigger("Throw");
+        networkAnim.SetTrigger("Throw");
         //Throw the disc
         Invoke("ThrowDisc", 0.5f);
         
@@ -60,9 +66,12 @@ public class gun : NetworkBehaviour
 
     public void ResetDisc()
     {
-        if (discReference != null)
+        // Destroy the disc reference
+        NetworkObject disc = discReference.TryGet(out NetworkObject discObject) ? discObject : null;
+
+        if (disc != null)
         {
-            Destroy(discReference); // Destroy any existing disc
+            Destroy(disc.gameObject);
         }
         canShoot = true; // Allow the player to throw a new disc
     }

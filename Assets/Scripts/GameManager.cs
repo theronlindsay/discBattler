@@ -49,11 +49,31 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    [Rpc(SendTo.Everyone)]
+    public void ReturnDiscServerRpc(NetworkObjectReference disc)
+    {
+        // Get the disc that needs to be returned
+        disc.TryGet(out NetworkObject discObject);
+        
+        if (discObject == null)
+        {
+            Debug.LogError("Disc not found!");
+            return;
+        }
+
+        // Call the return disc function on the child of the player
+        discObject.GetComponent<bullet>().Recall();
+    }
+
     [Rpc(SendTo.Server)]
     public void SpawnDiscRpc(Vector3 position, Quaternion rotation, NetworkObjectReference player)
     {
         //Instantiate the disc for everyone
         GameObject discObject = Instantiate(disc, position, rotation);
+        // Define the disc as a network object
+        NetworkObject networkObject = discObject.GetComponent<NetworkObject>();
+        // Spawn the disc for everyone
+        networkObject.Spawn();
         // Set the player that threw the disc
         discObject.GetComponent<bullet>().player = player;
         // Set the starting position of the disc
@@ -61,25 +81,25 @@ public class GameManager : NetworkBehaviour
         // Get the player that threw the disc
         player.TryGet(out NetworkObject playerObject);
         // Set the disc reference for the player
-        playerObject.GetComponentInChildren<gun>().discReference = discObject.GetComponent<NetworkObject>();
-        // Define the disc as a network object
-        NetworkObject networkObject = discObject.GetComponent<NetworkObject>();
-        // Set the disc reference for the player
         playerObject.GetComponentInChildren<gun>().discReference = networkObject;
-        // Spawn the disc for everyone
-        networkObject.Spawn();
-        networkObject.GetComponent<bullet>().Shoot(networkObject.transform.forward, 30);
+        // Set the disc reference for the player
+        playerObject.GetComponentInChildren<gun>().discReference = discObject.GetComponent<bullet>().GetReference();
+        discObject.GetComponent<Rigidbody>().AddForce(discObject.transform.forward * 30, ForceMode.Impulse);
+        
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void ShootDiscRpc(Vector3 direction, float bulletSpeed, NetworkObjectReference discReference)
+    {
+        discReference.TryGet(out NetworkObject discObject);
+
         
     }
 
     [Rpc(SendTo.Server)]
     public void ReturnDiscRpc(NetworkObjectReference disc)
     {
-        // Get the disc that needs to be returned
-        disc.TryGet(out NetworkObject discObject);
-
-        // Call the return disc function on the child of the player
-        discObject.GetComponent<bullet>().Recall();
+        ReturnDiscServerRpc(disc);
     }
     private void Awake()
     {
@@ -153,6 +173,7 @@ public class GameManager : NetworkBehaviour
     }   
 
     public void SpawnDisc(GameObject disc, Vector3 position, Quaternion rotation, NetworkObjectReference player){
+        NetworkObjectReference discReference = new NetworkObjectReference(disc.GetComponent<NetworkObject>());
         SpawnDiscRpc(position, rotation, player);
     }
 }

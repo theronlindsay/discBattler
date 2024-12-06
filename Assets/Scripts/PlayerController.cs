@@ -39,13 +39,14 @@ public class PlayerController : NetworkBehaviour
             thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
             networkSelf = this.NetworkObject;
             networkAnimator = networkSelf.GetComponentInChildren<NetworkAnimator>();
+            
         }   else {
             //Set the first and third person cameras to priority 0
             firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
             thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
         }
 
-        
+        menu.SetActive(false);
         gameManager = GameObject.Find("GameManager");
         // gameManager.GetComponent<GameManager>().AddPlayerServerRpc(this.NetworkObject);
         Transform spawnpoint = gameManager.GetComponent<GameManager>().GetSpawnPoint(OwnerClientId);
@@ -60,6 +61,7 @@ public class PlayerController : NetworkBehaviour
     public GameObject camHolder;
     public GameObject thirdPersonCam;
     public GameObject firstPersonCam;
+    public GameObject menu;
     public float speed, sprintSpeed, sensitivity, jumpForce, maxForce;
     public bool grounded;
     public bool canJump = true;
@@ -467,13 +469,17 @@ public class PlayerController : NetworkBehaviour
     public void OnFire(InputAction.CallbackContext context)
     {
         if(IsOwner){
-            networkSelf.GetComponentInChildren<gun>().Shoot();
+            gameObject.GetComponentInChildren<gun>().Shoot();
         }
     }
 
     public void OnMenu(InputAction.CallbackContext context)
     {
-        //Pause the game
+        if(IsOwner){
+            menu.SetActive(!menu.activeSelf);
+            //Unlock Mouse
+            Cursor.lockState = context.ReadValueAsButton() ? CursorLockMode.None : CursorLockMode.Locked;
+        }
     }
 
 }

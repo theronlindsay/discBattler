@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
 
 public class bullet : NetworkBehaviour
 {
@@ -101,7 +102,14 @@ public class bullet : NetworkBehaviour
         Debug.Log("Recalling");
         isReturning = true;
 
+        player.TryGet(out NetworkObject playerObject);
+
+
         // Move the bullet towards the player at a set speed
         MoveTowardsObject(player, returnSpeed);
+    }
+
+    public NetworkObjectReference GetReference(){
+        return new NetworkObjectReference(gameObject.GetComponent<NetworkObject>());
     }
 }

@@ -18274,22 +18274,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2605915482296578380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2683219667172790616}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dff074df71cc35e41b3c708fffd8b28d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  menuButton: {fileID: -7511139158420543551, guid: 8156a4a98a83151439878b248d463e4a,
-    type: 3}
-  menu: {fileID: 0}
-  uiInput: {fileID: 0}
 --- !u!1 &2683219667172790616
 GameObject:
   m_ObjectHideFlags: 0
@@ -18302,7 +18286,6 @@ GameObject:
   - component: {fileID: 419864468108129136}
   - component: {fileID: 7135009060873933943}
   - component: {fileID: 5078355396350724126}
-  - component: {fileID: 2605915482296578380}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
