@@ -35,16 +35,24 @@ public class PlayerController : NetworkBehaviour
         //if owner, set the camera priority to 10
         if (IsOwner)
         {
-            firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
-            thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
+            if (firstPersonCam != null && thirdPersonCam != null)
+            {
+                firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
+                thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
+            }
             networkSelf = this.NetworkObject;
             networkAnimator = networkSelf.GetComponentInChildren<NetworkAnimator>();
             
         }   else {
             //Set the first and third person cameras to priority 0
-            firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
-            thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
+            if (firstPersonCam != null && thirdPersonCam != null)
+            {
+                firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
+                thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 0;
+            }
         }
+
+        Debug.Log("IsOwner: " + IsOwner);
 
         menu.SetActive(false);
         gameManager = GameObject.Find("GameManager");
@@ -154,6 +162,7 @@ public class PlayerController : NetworkBehaviour
 
         // Reset velocity and animations
         rb.velocity = Vector3.zero;
+
         networkAnimator.ResetTrigger("Throw");
 
         // Reset the disc
@@ -469,6 +478,7 @@ public class PlayerController : NetworkBehaviour
     public void OnFire(InputAction.CallbackContext context)
     {
         if(IsOwner){
+            Debug.Log("Im shooting from this clientid: " + OwnerClientId);
             gameObject.GetComponentInChildren<gun>().Shoot();
         }
     }

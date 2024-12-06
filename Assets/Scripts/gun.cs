@@ -40,7 +40,7 @@ public class gun : NetworkBehaviour
 
     public void Shoot()
     {
-        
+        Debug.Log("Got to shoot, canShoot: " + canShoot + " IsOwner: " + IsOwner);
         //Check if the gun can shoot
         if (!canShoot || !IsOwner)
         {
@@ -48,6 +48,7 @@ public class gun : NetworkBehaviour
         }
         //reset the canShoot variable
         canShoot = false;
+        Debug.Log("CanShoot: " + canShoot); 
         networkAnim.SetTrigger("Throw");
         //Throw the disc
         Invoke("ThrowDisc", 0.5f);

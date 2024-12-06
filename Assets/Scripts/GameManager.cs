@@ -17,8 +17,8 @@ public class GameManager : NetworkBehaviour
     public Transform spawnPointPlayer1;
     public Transform spawnPointPlayer2;
 
-    public GameObject player1;
-    public GameObject player2;
+    public NetworkObjectReference player1;
+    public NetworkObjectReference player2;
 
     public GameObject disc; // The disc prefab
 
@@ -26,6 +26,34 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void PlayerScoredServerRpc(NetworkObjectReference scoringPlayer)
     {
+        // Award point to the scoring player
+        if (scoringPlayer.TryGet(out NetworkObject scoringObject))
+        {
+            if (scoringObject != null)
+            {
+                UpdatePlayerScoreServerRpc(scoringObject.OwnerClientId, scoringPlayer);
+            }
+        }
+
+        Debug.Log($"Player 1: {player1Score.Value} | Player 2: {player2Score.Value}");
+        // Check if the game should end
+        if (currentRound.Value >= maxRounds || Mathf.Max(player1Score.Value, player2Score.Value) > maxRounds / 2)
+        {
+            EndGame();
+        }
+        else
+        {
+            NextRound();
+        }
+    }
+
+    [ServerRpc]
+    private void UpdatePlayerScoreServerRpc(ulong clientId, NetworkObjectReference scoringPlayer)
+    {
+        if (clientId == 0) // Assuming Player 1
+            player1Score.Value++;
+        else if (clientId == 1) // Assuming Player 2
+            player2Score.Value++;
 
         // Award point to the scoring player
         if (scoringPlayer.TryGet(out NetworkObject scoringObject))
@@ -63,6 +91,7 @@ public class GameManager : NetworkBehaviour
 
         // Call the return disc function on the child of the player
         discObject.GetComponent<bullet>().Recall();
+        
     }
 
     [Rpc(SendTo.Server)]
@@ -86,6 +115,15 @@ public class GameManager : NetworkBehaviour
         playerObject.GetComponentInChildren<gun>().discReference = discObject.GetComponent<bullet>().GetReference();
         discObject.GetComponent<Rigidbody>().AddForce(discObject.transform.forward * 30, ForceMode.Impulse);
         
+        Debug.Log("Disc Spawned");
+        if (player.TryGet(out NetworkObject playerObj))
+        {
+            Debug.Log("Disc Owner: " + playerObj.OwnerClientId);
+        }
+        else
+        {
+            Debug.LogError("Failed to get the player object from the reference.");
+        }
     }
 
     [Rpc(SendTo.ClientsAndHost)]
@@ -121,7 +159,10 @@ public class GameManager : NetworkBehaviour
 
     private void NextRound()
     {
-        currentRound.Value++;
+        if (IsServer)
+        {
+            currentRound.Value++;
+        }
         Debug.Log($"Starting Round {currentRound.Value}");
 
         // Reset all players to their spawn points
@@ -152,6 +193,20 @@ public class GameManager : NetworkBehaviour
         {
             Transform spawnPoint = GetSpawnPoint(player.OwnerClientId);
             player.ResetStateServerRpc(spawnPoint.position, spawnPoint.rotation);
+        }
+
+        // Reset the disc
+        ResetDiscClientRpc();
+
+    }
+
+    [ClientRpc]
+    public void ResetDiscClientRpc()
+    {
+        // Reset the guns on both players
+        foreach (var player in FindObjectsOfType<PlayerController>())
+        {
+            player.GetComponentInChildren<gun>().ResetDisc();
         }
     }
 

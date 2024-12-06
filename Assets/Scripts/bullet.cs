@@ -4,6 +4,17 @@ using Unity.Services.Lobbies.Models;
 
 public class bullet : NetworkBehaviour
 {
+    [ClientRpc]
+    void UpdateReturningClientRpc(bool isReturning)
+    {
+        this.isReturning = isReturning;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void UpdateReturningServerRpc(bool isReturning)
+    {
+        this.isReturning = isReturning;
+    }
     // Bullet attributes
     [Header("Bullet Attributes")]
     public float damage = 1;
@@ -18,7 +29,10 @@ public class bullet : NetworkBehaviour
     {
         if (isReturning)
         {
-            MoveTowardsObject(player, returnSpeed);
+            if (player.TryGet(out NetworkObject playerObject))
+            {
+                MoveTowardsObject(playerObject.gameObject, returnSpeed);
+            }
         }
     }
 
@@ -32,9 +46,9 @@ public class bullet : NetworkBehaviour
     }
 
     // Handle collisions
-    private void OnCollisionEnter(Collision collision)
+    public void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player") && collision.gameObject != player.TryGet(out NetworkObject playergameObject))
+        if (collision.gameObject.CompareTag("Player") && (!player.TryGet(out NetworkObject playergameObject) || collision.gameObject != playergameObject.gameObject))
         {
             Debug.Log("Hit another player!");
 
@@ -44,15 +58,17 @@ public class bullet : NetworkBehaviour
             return;
         }
 
-        if (collision.gameObject == player.TryGet(out NetworkObject playerObject))
+        Debug.Log("Hit something else: " + collision.gameObject.name + " isReturning: " + isReturning + " player: " + player);
+        if (player.TryGet(out NetworkObject playerObject) && collision.gameObject == playerObject.gameObject)
         {   
+            Debug.Log("Hit the player isReturning: " + isReturning);        
             if(isReturning){
                 Debug.Log("Disc returned to player");
                 isReturning = false;
                 // Call the return disc function on the child of the player
-                if (player.TryGet(out NetworkObject gunObject))
+                if (player.TryGet(out NetworkObject gunNetworkObject))
                 {
-                    gun playerGun = gunObject.GetComponentInChildren<gun>();
+                    gun playerGun = gunNetworkObject.GetComponentInChildren<gun>();
                     
                     if (playerGun != null)
                     {
@@ -67,22 +83,19 @@ public class bullet : NetworkBehaviour
 
         Debug.Log("Hit something else: " + collision.gameObject.name);
 
-            if (player.TryGet(out NetworkObject networkObject))
-            {
-                networkObject.GetComponentInChildren<gun>().Recall();
-            }
-        if (collision.gameObject.CompareTag("Ground"))
+        if (player.TryGet(out NetworkObject networkObject))
         {
-            if (player.TryGet(out NetworkObject gunObject))
-                {
-                    gun playerGun = gunObject.GetComponentInChildren<gun>();
-                    
-                    if (playerGun != null)
-                    {
-                        playerGun.Recall();
-                    }
-                }
+            networkObject.GetComponentInChildren<gun>().Recall();
         }
+        if (player.TryGet(out NetworkObject gunObject))
+            {
+                gun playerGun = gunObject.GetComponentInChildren<gun>();
+                
+                if (playerGun != null)
+                {
+                    playerGun.Recall();
+                }
+            }
     }
 
     public void Shoot(Vector3 direction, float bulletSpeed)
@@ -100,13 +113,25 @@ public class bullet : NetworkBehaviour
     {
         // Return the bullet to the player
         Debug.Log("Recalling");
+        //Make the bullet kinematic
+        gameObject.GetComponent<Rigidbody>().isKinematic = true;
         isReturning = true;
-
-        player.TryGet(out NetworkObject playerObject);
-
-
-        // Move the bullet towards the player at a set speed
-        MoveTowardsObject(player, returnSpeed);
+        UpdateReturningClientRpc(isReturning);
+        if (IsServer)
+        {
+            UpdateReturningClientRpc(isReturning);
+        }
+        else
+        {
+            UpdateReturningServerRpc(isReturning);
+        }
+        if (player.TryGet(out NetworkObject playerObject))
+        {
+            // Make sure the bullet is not kinematic
+            gameObject.GetComponent<Rigidbody>().isKinematic = true;
+            // Move the bullet towards the player at a set speed
+            MoveTowardsObject(playerObject.gameObject, returnSpeed);
+        }
     }
 
     public NetworkObjectReference GetReference(){
