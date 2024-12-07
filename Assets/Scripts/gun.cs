@@ -16,8 +16,7 @@ public class gun : NetworkBehaviour
     public float bulletSpeed;
     //public GameObject bulletPrefab;
     public NetworkObjectReference discReference;
-    private bool canShoot = true;
-    private float nextTimeToFire = 0;
+    public bool canShoot = true;
     public Animator anim;
     public NetworkAnimator networkAnim;    
     public GameObject player;
@@ -35,6 +34,12 @@ public class gun : NetworkBehaviour
 
     // Activate Recall
     public void Recall(){
+        if (discReference.TryGet(out NetworkObject discObject)){
+            if (IsOwner)
+            {
+                ReturnDiscServerRpc();
+            }
+        }
         GameManager.Instance.ReturnDiscRpc(discReference);
     }
 
@@ -56,13 +61,19 @@ public class gun : NetworkBehaviour
     }
 
     //Recall disk sends the disc back to the player, when the player collides with it, enable CanShoot
-    public void ReturnDisc(){
+    [ServerRpc (RequireOwnership = false)]
+    public void ReturnDiscServerRpc(){
+        ReturnDiscClientRpc();
+    }
+
+    [ClientRpc (RequireOwnership = false)]  
+    private void ReturnDiscClientRpc(){
         // Launch the disc back to the player
         canShoot = true;
     }
 
     private void ThrowDisc(){
-        GameManager.Instance.SpawnDiscRpc(launchPoint.transform.position, launchPoint.transform.rotation, playerReference);
+        GameManager.Instance.SpawnDiscRpc(launchPoint.transform.position, launchPoint.transform.rotation, playerReference, OwnerClientId);
     }
 
     public void ResetDisc()

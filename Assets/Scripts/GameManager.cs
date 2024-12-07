@@ -77,40 +77,38 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Everyone)]
-    public void ReturnDiscServerRpc(NetworkObjectReference disc)
-    {
-        // Get the disc that needs to be returned
-        disc.TryGet(out NetworkObject discObject);
+    // [Rpc(SendTo.ClientsAndHost)]
+    // public void ReturnDiscServerRpc(NetworkObjectReference disc)
+    // {
+    //     // Get the disc that needs to be returned
+    //     disc.TryGet(out NetworkObject discObject);
         
-        if (discObject == null)
-        {
-            Debug.LogError("Disc not found!");
-            return;
-        }
+    //     if (discObject == null)
+    //     {
+    //         Debug.LogError("Disc not found!");
+    //         return;
+    //     }
 
-        // Call the return disc function on the child of the player
-        discObject.GetComponent<bullet>().Recall();
+    //     // Call the return disc function on the child of the player
+    //     discObject.GetComponent<bullet>().Recall();
         
-    }
+    // }
 
     [Rpc(SendTo.Server)]
-    public void SpawnDiscRpc(Vector3 position, Quaternion rotation, NetworkObjectReference player)
+    public void SpawnDiscRpc(Vector3 position, Quaternion rotation, NetworkObjectReference player, ulong clientId)
     {
-        //Instantiate the disc for everyone
+        // // Spawn the disc clients
         GameObject discObject = Instantiate(disc, position, rotation);
-        // Define the disc as a network object
-        NetworkObject networkObject = discObject.GetComponent<NetworkObject>();
-        // Spawn the disc for everyone
-        networkObject.Spawn();
+        NetworkObject networkDisc = discObject.GetComponent<NetworkObject>();
+        networkDisc.Spawn();
         // Set the player that threw the disc
-        discObject.GetComponent<bullet>().player = player;
+        networkDisc.GetComponent<bullet>().player = player;
         // Set the starting position of the disc
-        discObject.GetComponent<bullet>().startingPosition = position;
+        networkDisc.GetComponent<bullet>().startingPosition = position;
         // Get the player that threw the disc
         player.TryGet(out NetworkObject playerObject);
         // Set the disc reference for the player
-        playerObject.GetComponentInChildren<gun>().discReference = networkObject;
+        playerObject.GetComponentInChildren<gun>().discReference = networkDisc;
         // Set the disc reference for the player
         playerObject.GetComponentInChildren<gun>().discReference = discObject.GetComponent<bullet>().GetReference();
         discObject.GetComponent<Rigidbody>().AddForce(discObject.transform.forward * 30, ForceMode.Impulse);
@@ -126,10 +124,17 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    public void SpawnDiscOnClientsRpc(NetworkObjectReference discReference)
+    {
+        discReference.TryGet(out NetworkObject discObject);
+        discObject.Spawn();
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     public void ShootDiscRpc(Vector3 direction, float bulletSpeed, NetworkObjectReference discReference)
     {
         discReference.TryGet(out NetworkObject discObject);
+        discObject.GetComponent<bullet>().Shoot(direction, bulletSpeed);
 
         
     }
@@ -137,7 +142,14 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void ReturnDiscRpc(NetworkObjectReference disc)
     {
-        ReturnDiscServerRpc(disc);
+        //Get the disc object and call the recall function
+        if(disc.TryGet(out NetworkObject discObject)){
+            discObject.GetComponent<bullet>().Recall();
+        } else {
+            Debug.LogError("Disc not found!");
+    
+            //Send a message to the player that the disc was not found
+        }   
     }
     private void Awake()
     {
@@ -229,6 +241,6 @@ public class GameManager : NetworkBehaviour
 
     public void SpawnDisc(GameObject disc, Vector3 position, Quaternion rotation, NetworkObjectReference player){
         NetworkObjectReference discReference = new NetworkObjectReference(disc.GetComponent<NetworkObject>());
-        SpawnDiscRpc(position, rotation, player);
+        SpawnDiscRpc(position, rotation, player, OwnerClientId);
     }
 }

@@ -15,12 +15,42 @@ public class bullet : NetworkBehaviour
     {
         this.isReturning = isReturning;
     }
+    [ClientRpc]
+    public void ReturnDiscClientRpc()
+    {
+        if(IsOwner){
+
+            //Find the player with the same client id as this script
+            NetworkManager.Singleton.ConnectedClients.TryGetValue(OwnerClientId, out var networkClient);
+            if (networkClient != null)
+            {
+                //find the player object with the same owner as this script
+                NetworkObject playerNetworkObject = networkClient.PlayerObject;
+                // Call the return disc function on the child of the player
+                if (playerNetworkObject)
+                {
+                    playerNetworkObject.GetComponentInChildren<gun>().ReturnDiscServerRpc();
+                    playerNetworkObject.GetComponentInChildren<gun>().canShoot = true;
+                }
+            }
+            //find the player object with the same owner as this script
+            player.TryGet(out NetworkObject playerObject);
+            // Call the return disc function on the child of the player
+            if (playerObject)
+            {
+                playerObject.GetComponentInChildren<gun>().ReturnDiscServerRpc();
+                playerObject.GetComponentInChildren<gun>().canShoot = true;
+            }
+        }
+    }
+
     // Bullet attributes
     [Header("Bullet Attributes")]
     public float damage = 1;
 
     public Vector3 startingPosition;
     public NetworkObjectReference player;
+    public GameObject localPlayer;  
 
     public float returnSpeed = 10f;
     public bool isReturning = false;
@@ -31,6 +61,7 @@ public class bullet : NetworkBehaviour
         {
             if (player.TryGet(out NetworkObject playerObject))
             {
+                localPlayer = playerObject.gameObject;
                 MoveTowardsObject(playerObject.gameObject, returnSpeed);
             }
         }
@@ -59,22 +90,40 @@ public class bullet : NetworkBehaviour
         }
 
         Debug.Log("Hit something else: " + collision.gameObject.name + " isReturning: " + isReturning + " player: " + player);
+
+
         if (player.TryGet(out NetworkObject playerObject) && collision.gameObject == playerObject.gameObject)
         {   
-            Debug.Log("Hit the player isReturning: " + isReturning);        
+            Debug.Log("Hit the player that threw it isReturning: " + isReturning);        
             if(isReturning){
-                Debug.Log("Disc returned to player");
-                isReturning = false;
-                // Call the return disc function on the child of the player
-                if (player.TryGet(out NetworkObject gunNetworkObject))
+                gun gunComponent = playerObject.GetComponentInChildren<gun>();
+                if (gunComponent != null)
                 {
-                    gun playerGun = gunNetworkObject.GetComponentInChildren<gun>();
-                    
-                    if (playerGun != null)
+                    NetworkObject gunNetworkObject = gunComponent.GetComponentInParent<NetworkObject>();
+                    if (gunNetworkObject != null)
                     {
-                        playerGun.ReturnDisc();
+                        ReturnDiscClientRpc();
+                    }
+                    else
+                    {
+                        Debug.LogError("NetworkObject component not found in gun component.");
                     }
                 }
+                else
+                {
+                    Debug.LogError("Gun component not found in player object.");
+                }
+                
+                
+                // Call the return disc function on the child of the player
+                if (playerObject)
+                {
+                    Debug.Log("Returning Disc");    
+                    playerObject.GetComponentInChildren<gun>().ReturnDiscServerRpc();
+                    playerObject.GetComponentInChildren<gun>().canShoot = true;
+                }
+
+                isReturning = false;
                 
                 Destroy(gameObject);
             }
@@ -87,15 +136,6 @@ public class bullet : NetworkBehaviour
         {
             networkObject.GetComponentInChildren<gun>().Recall();
         }
-        if (player.TryGet(out NetworkObject gunObject))
-            {
-                gun playerGun = gunObject.GetComponentInChildren<gun>();
-                
-                if (playerGun != null)
-                {
-                    playerGun.Recall();
-                }
-            }
     }
 
     public void Shoot(Vector3 direction, float bulletSpeed)

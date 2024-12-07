@@ -181,6 +181,7 @@ MonoBehaviour:
   fireRate: 1
   impactForce: 100
   bulletSpeed: 30
+  canShoot: 1
   anim: {fileID: 8733313470898296621}
   networkAnim: {fileID: 6849058938368960103}
   player: {fileID: 3152492605880968201}
@@ -1886,10 +1887,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
+  m_Radius: 0.54827523
+  m_Height: 2.3806663
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: -0.013234854, y: 0.14715727, z: 0}
 --- !u!54 &7213586400708312628
 Rigidbody:
   m_ObjectHideFlags: 0
