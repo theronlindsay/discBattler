@@ -73,7 +73,7 @@ public class gun : NetworkBehaviour
     }
 
     private void ThrowDisc(){
-        GameManager.Instance.SpawnDiscRpc(launchPoint.transform.position, launchPoint.transform.rotation, playerReference, OwnerClientId);
+        GameManager.Instance.SpawnDiscRpc(launchPoint.transform.position, launchPoint.transform.rotation, playerReference);
     }
 
     public void ResetDisc()

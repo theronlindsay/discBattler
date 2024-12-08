@@ -183,7 +183,7 @@ MonoBehaviour:
   bulletSpeed: 30
   canShoot: 1
   anim: {fileID: 8733313470898296621}
-  networkAnim: {fileID: 7827822643013955140}
+  networkAnim: {fileID: 0}
   player: {fileID: 3152492605880968201}
 --- !u!1 &334938427909068638
 GameObject:
@@ -739,7 +739,7 @@ GameObject:
   - component: {fileID: 1921832960076469744}
   - component: {fileID: 8733313470898296621}
   - component: {fileID: 3306627133426421924}
-  - component: {fileID: 7827822643013955140}
+  - component: {fileID: 7303703468307620187}
   m_Layer: 0
   m_Name: PlayerModel
   m_TagString: Untagged
@@ -798,7 +798,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraHolder: {fileID: 91363873203741770}
---- !u!114 &7827822643013955140
+--- !u!114 &7303703468307620187
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -807,7 +807,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1288144158523821898}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0a313c698f7796b41afbe984f0edadfa, type: 3}
+  m_Script: {fileID: 11500000, guid: ad8deae8091111f4eb30a56c1f4e0d3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   TransitionStateInfoList:
@@ -1787,8 +1787,8 @@ GameObject:
   - component: {fileID: 195309689859588188}
   - component: {fileID: 4900639905331482974}
   - component: {fileID: 4626798738216041089}
-  - component: {fileID: 8593061937967469946}
-  - component: {fileID: 8812924346513594525}
+  - component: {fileID: 335704386744779982}
+  - component: {fileID: 1653667462057390465}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -1952,8 +1952,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 0}
-  networkSelf: {fileID: 0}
-  networkAnimator: {fileID: 0}
+  networkSelf: {fileID: 351762317171537822}
+  networkAnimator: {fileID: 7303703468307620187}
   rb: {fileID: 7213586400708312628}
   camHolder: {fileID: 91363873203741770}
   thirdPersonCam: {fileID: 5813835010633329215}
@@ -2203,7 +2203,7 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3152492605880968201}
   m_Enabled: 1
---- !u!114 &8593061937967469946
+--- !u!114 &335704386744779982
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2234,7 +2234,7 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &8812924346513594525
+--- !u!114 &1653667462057390465
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

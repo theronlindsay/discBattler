@@ -52,12 +52,12 @@
                 },
                 {
                     "name": "Aim",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "fdbd5de5-ebbc-4b79-bd00-f059ecf07cc0",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Slide",
@@ -322,7 +322,7 @@
                 {
                     "name": "",
                     "id": "b5efea00-3569-417c-b383-69b37cb73dc6",
-                    "path": "<XInputController>/leftShoulder",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",

@@ -1,10 +1,13 @@
-Custom Multiplayer Player Controller
+Disc Battler
+
+Current Build is Placed in the Builds Folder.
 
 - Physics Based Movement
 - Easily interact with other rigidbodies
 - Player position and Bullets synced between clients
 - 1 player per client
 - Keyboard and Mouse and Gamepad are supported
+- IP Address from host can be entered to join game, only 2 players
 
 # Input
 
@@ -24,12 +27,15 @@ Hold Shift - Sprint
 
 CTRL - Slide
 
+E - Recall Disc
 
 Gamepad:
 
 Left Stick - Move
 
 Left Bumper - Jump (trust me bro)
+
+Right Bumper - Recall Disc
 
 Right Stick - Aim
 

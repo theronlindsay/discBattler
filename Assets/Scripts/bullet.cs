@@ -4,6 +4,8 @@ using Unity.Services.Lobbies.Models;
 
 public class bullet : NetworkBehaviour
 {
+
+    public bool hitAnotherPlayer = false;
     [ClientRpc]
     void UpdateReturningClientRpc(bool isReturning)
     {
@@ -79,8 +81,10 @@ public class bullet : NetworkBehaviour
     // Handle collisions
     public void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player") && (!player.TryGet(out NetworkObject playergameObject) || collision.gameObject != playergameObject.gameObject))
+        player.TryGet(out NetworkObject playerObject);
+        if (collision.gameObject.CompareTag("Player") && collision.gameObject != playerObject.gameObject && !hitAnotherPlayer)
         {
+            hitAnotherPlayer = true;
             Debug.Log("Hit another player!");
 
             // Notify the GameManager that a player scored
@@ -92,7 +96,7 @@ public class bullet : NetworkBehaviour
         Debug.Log("Hit something else: " + collision.gameObject.name + " isReturning: " + isReturning + " player: " + player);
 
 
-        if (player.TryGet(out NetworkObject playerObject) && collision.gameObject == playerObject.gameObject)
+        if (collision.gameObject == playerObject.gameObject)
         {   
             Debug.Log("Hit the player that threw it isReturning: " + isReturning);        
             if(isReturning){

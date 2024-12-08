@@ -14,6 +14,10 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> player2Score = new NetworkVariable<int>();
     public NetworkVariable<int> currentRound = new NetworkVariable<int>(1);
 
+    public GameObject gameOverScreen;   
+
+    public NetworkObjectReference gameOverScreenReference;
+
 
 
     [Header("Spawn Points")]
@@ -26,7 +30,7 @@ public class GameManager : NetworkBehaviour
     public GameObject disc; // The disc prefab
 
     public static GameManager Instance;
-    [Rpc(SendTo.Everyone)]
+    [Rpc(SendTo.Everyone, RequireOwnership = false)]
     public void PlayerScoredServerRpc(NetworkObjectReference scoringPlayer)
     {
         // Award point to the scoring player
@@ -50,7 +54,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void UpdatePlayerScoreServerRpc(ulong clientId, NetworkObjectReference scoringPlayer)
     {
         // if (clientId == 0) // Assuming Player 1
@@ -98,7 +102,7 @@ public class GameManager : NetworkBehaviour
     // }
 
     [Rpc(SendTo.Server)]
-    public void SpawnDiscRpc(Vector3 position, Quaternion rotation, NetworkObjectReference player, ulong clientId)
+    public void SpawnDiscRpc(Vector3 position, Quaternion rotation, NetworkObjectReference player)
     {
         // // Spawn the disc clients
         GameObject discObject = Instantiate(disc, position, rotation);
@@ -170,6 +174,9 @@ public class GameManager : NetworkBehaviour
             player2Score.Value = 0;
             currentRound.Value = 1;
         }
+
+        //Set the game over screen reference
+        gameOverScreenReference = new NetworkObjectReference(gameOverScreen.GetComponent<NetworkObject>());
     }
 
     private void NextRound()
@@ -189,7 +196,19 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Game Over!");
         string winner = player1Score.Value > player2Score.Value ? "Player 1" : "Player 2";
         Debug.Log($"{winner} Wins!");
-        // Add logic to reset or exit to main menu
+
+        gameOverScreen.SetActive(true);
+        gameOverScreen.GetComponentInChildren<TextMeshProUGUI>().text = $"{winner} Wins!";
+
+        // Update the game over screen on all clients
+        UpdateGameOverScreenClientRpc(winner);
+    }
+
+    [ClientRpc]
+    public void UpdateGameOverScreenClientRpc(string winner)
+    {
+        gameOverScreen.SetActive(true);
+        gameOverScreen.GetComponentInChildren<TextMeshProUGUI>().text = $"{winner} Wins!";
     }
 
     private void ResetPlayers()
@@ -244,6 +263,6 @@ public class GameManager : NetworkBehaviour
 
     public void SpawnDisc(GameObject disc, Vector3 position, Quaternion rotation, NetworkObjectReference player){
         NetworkObjectReference discReference = new NetworkObjectReference(disc.GetComponent<NetworkObject>());
-        SpawnDiscRpc(position, rotation, player, OwnerClientId);
+        SpawnDiscRpc(position, rotation, player);
     }
 }

@@ -40,8 +40,8 @@ public class PlayerController : NetworkBehaviour
                 firstPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
                 thirdPersonCam.GetComponent<Cinemachine.CinemachineVirtualCamera>().Priority = 10;
             }
-            networkSelf = this.NetworkObject;
-            networkAnimator = networkSelf.GetComponentInChildren<NetworkAnimator>();
+            // networkSelf = this.NetworkObject;
+            // networkAnimator = networkSelf.GetComponentInChildren<NetworkAnimator>();
             
         }   else {
             //Set the first and third person cameras to priority 0
