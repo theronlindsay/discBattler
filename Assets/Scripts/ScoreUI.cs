@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ScoreUI : MonoBehaviour
 {
-    public Text player1ScoreText;
-    public Text player2ScoreText;
-    public Text roundText;
+    public TextMeshProUGUI player1ScoreText;
+    public TextMeshProUGUI player2ScoreText;
+    public TextMeshProUGUI roundText;
 
     private void Update()
     {

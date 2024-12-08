@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
 using UnityEditor;
+using TMPro;
 
 public class GameManager : NetworkBehaviour
 {
@@ -12,6 +13,8 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> player1Score = new NetworkVariable<int>();
     public NetworkVariable<int> player2Score = new NetworkVariable<int>();
     public NetworkVariable<int> currentRound = new NetworkVariable<int>(1);
+
+
 
     [Header("Spawn Points")]
     public Transform spawnPointPlayer1;
@@ -50,10 +53,10 @@ public class GameManager : NetworkBehaviour
     [ServerRpc]
     private void UpdatePlayerScoreServerRpc(ulong clientId, NetworkObjectReference scoringPlayer)
     {
-        if (clientId == 0) // Assuming Player 1
-            player1Score.Value++;
-        else if (clientId == 1) // Assuming Player 2
-            player2Score.Value++;
+        // if (clientId == 0) // Assuming Player 1
+        //     player1Score.Value++;
+        // else if (clientId == 1) // Assuming Player 2
+        //     player2Score.Value++;
 
         // Award point to the scoring player
         if (scoringPlayer.TryGet(out NetworkObject scoringObject))
