@@ -77,6 +77,7 @@ public class PlayerController : NetworkBehaviour
     private bool isSliding;
     public Quaternion nextRotation;
     private float aimValue;
+    public bool canShoot = true;    
 
     //Spring components
     [Header("Spring Components")]
@@ -487,8 +488,20 @@ public class PlayerController : NetworkBehaviour
     {
         if(IsOwner){
             menu.SetActive(!menu.activeSelf);
-            //Unlock Mouse
-            Cursor.lockState = context.ReadValueAsButton() ? CursorLockMode.None : CursorLockMode.Locked;
+            //Unfreeze the cursor
+            Cursor.lockState = menu.activeSelf ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = menu.activeSelf;
+
+            //Disable controls
+            if(menu.activeSelf){
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                canShoot = false;
+            } else {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                canShoot = true;
+            }
         }
     }
 
